@@ -365,7 +365,10 @@ export function GameClient({ mode = "timed" }: GameClientProps) {
   return (
     <div className="relative z-10 mx-auto flex min-h-dvh w-full max-w-5xl flex-col px-4 py-6 sm:px-6">
       <HowToPlay />
-      <Celebration active={finished && newBest} />
+      <Celebration
+        active={finished && solved > 0}
+        big={newBest || solved >= 8}
+      />
       <ComboToast points={comboPoints} streak={comboStreak} />
       <header className="mb-6 flex min-h-[3.5rem] flex-wrap items-center justify-between gap-4">
         <Link href="/" className="group">
@@ -573,7 +576,13 @@ export function GameClient({ mode = "timed" }: GameClientProps) {
 
         {finished && (
           <section className="mx-auto mt-2 w-full max-w-md flex-1 text-center">
-            <p className="text-base text-ash">Nice work!</p>
+            <p className="text-lg text-ash">
+              {solved === 0
+                ? "Nice try — next round will click."
+                : solved === 1
+                  ? "You got 1 correct!"
+                  : `You got ${solved} correct!`}
+            </p>
             <h2 className="mt-2 text-6xl font-semibold text-amber">{score}</h2>
             {newBest && (
               <p className="mt-2 text-base text-lacquer">New best score!</p>
@@ -586,7 +595,64 @@ export function GameClient({ mode = "timed" }: GameClientProps) {
                 })}
               </ul>
             )}
-            <p className="mt-2 text-ash">{solved} correct</p>
+
+            <div className="mt-8 space-y-3">
+              {mode === "practice" ? (
+                <Link
+                  href="/play/daily"
+                  className="block rounded-full bg-lacquer px-8 py-4 text-base font-medium text-white transition hover:bg-lacquer-deep"
+                >
+                  Try today’s puzzle
+                </Link>
+              ) : mode === "daily" ? (
+                <Link
+                  href="/play"
+                  className="block rounded-full bg-lacquer px-8 py-4 text-base font-medium text-white transition hover:bg-lacquer-deep"
+                >
+                  Play a timed round
+                </Link>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => startGame(difficulty)}
+                  className="w-full rounded-full bg-lacquer px-8 py-4 text-base font-medium text-white transition hover:bg-lacquer-deep"
+                >
+                  Play again
+                </button>
+              )}
+
+              <div className="flex flex-wrap items-center justify-center gap-3">
+                {mode !== "timed" && (
+                  <button
+                    type="button"
+                    onClick={() => startGame(difficulty)}
+                    className="rounded-full border border-smoke px-5 py-2.5 text-sm text-ash transition hover:border-paper hover:text-paper"
+                  >
+                    Play again
+                  </button>
+                )}
+                {mode === "timed" && (
+                  <Link
+                    href="/play/daily"
+                    className="rounded-full border border-smoke px-5 py-2.5 text-sm text-ash transition hover:border-paper hover:text-paper"
+                  >
+                    Today’s puzzle
+                  </Link>
+                )}
+                <ShareScoreButton
+                  score={score}
+                  solved={solved}
+                  modeLabel={
+                    mode === "daily"
+                      ? "Today"
+                      : mode === "practice"
+                        ? "Practice"
+                        : `Play ${difficulty}`
+                  }
+                />
+              </div>
+            </div>
+
             {mode !== "practice" && (
               <div className="mt-6 flex flex-col gap-3">
                 <input
@@ -600,7 +666,7 @@ export function GameClient({ mode = "timed" }: GameClientProps) {
                   type="button"
                   onClick={() => void submitScore()}
                   disabled={saving}
-                  className="rounded-full bg-lacquer px-5 py-3 text-base font-medium text-white transition hover:bg-lacquer-deep disabled:opacity-60"
+                  className="rounded-full border border-amber/40 px-5 py-3 text-base text-amber transition hover:bg-amber/10 disabled:opacity-60"
                 >
                   {saving ? "Saving…" : "Save my score"}
                 </button>
@@ -609,26 +675,6 @@ export function GameClient({ mode = "timed" }: GameClientProps) {
             {saveMessage && (
               <p className="mt-3 text-sm text-ash">{saveMessage}</p>
             )}
-            <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
-              <button
-                type="button"
-                onClick={() => startGame(difficulty)}
-                className="rounded-full bg-lacquer px-8 py-3 text-base font-medium text-white transition hover:bg-lacquer-deep"
-              >
-                Play again
-              </button>
-              <ShareScoreButton
-                score={score}
-                solved={solved}
-                modeLabel={
-                  mode === "daily"
-                    ? "Today"
-                    : mode === "practice"
-                      ? "Practice"
-                      : `Play ${difficulty}`
-                }
-              />
-            </div>
             {mode !== "practice" && (
               <Leaderboard defaultFilter={mode === "daily" ? "day" : "week"} />
             )}
