@@ -1,3 +1,5 @@
+import { previousDayKey, todayKey } from "@/lib/daily";
+
 export type PersonalStats = {
   gamesPlayed: number;
   totalSolved: number;
@@ -7,6 +9,8 @@ export type PersonalStats = {
   lastDailyKey: string | null;
   lastDailyScore: number;
   bestDailyScore: number;
+  playDayStreak: number;
+  lastPlayDayKey: string | null;
 };
 
 const STORAGE_KEY = "soroban-stats-v1";
@@ -21,6 +25,8 @@ const EMPTY: PersonalStats = {
   lastDailyKey: null,
   lastDailyScore: 0,
   bestDailyScore: 0,
+  playDayStreak: 0,
+  lastPlayDayKey: null,
 };
 
 function emit() {
@@ -56,6 +62,16 @@ export function recordRun(params: {
   dailyKey?: string | null;
 }): PersonalStats {
   const current = loadStats();
+  const day = todayKey();
+  let playDayStreak = current.playDayStreak || 0;
+  if (current.lastPlayDayKey === day) {
+    playDayStreak = Math.max(playDayStreak, 1);
+  } else if (current.lastPlayDayKey === previousDayKey(day)) {
+    playDayStreak = playDayStreak + 1;
+  } else {
+    playDayStreak = 1;
+  }
+
   const next: PersonalStats = {
     ...current,
     gamesPlayed: current.gamesPlayed + 1,
@@ -63,6 +79,8 @@ export function recordRun(params: {
     totalSkipped: current.totalSkipped + (params.skipped ?? 0),
     bestScore: Math.max(current.bestScore, params.score),
     bestStreak: Math.max(current.bestStreak, params.streak),
+    playDayStreak,
+    lastPlayDayKey: day,
   };
 
   if (params.dailyKey) {
