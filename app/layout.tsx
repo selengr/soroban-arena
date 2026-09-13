@@ -29,6 +29,15 @@ export const metadata: Metadata = {
   applicationName: "Soroban Arena",
   keywords: ["soroban", "abacus", "math game", "race", "leaderboard"],
   manifest: "/manifest.webmanifest",
+  appleWebApp: {
+    capable: true,
+    title: "Soroban",
+    statusBarStyle: "black-translucent",
+  },
+  icons: {
+    icon: [{ url: "/icon-192.svg", type: "image/svg+xml" }],
+    apple: [{ url: "/icon-192.svg" }],
+  },
   openGraph: {
     title: "Soroban Arena",
     description:
@@ -48,6 +57,7 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({
