@@ -370,23 +370,35 @@ export function GameClient({ mode = "timed" }: GameClientProps) {
         big={newBest || solved >= 8}
       />
       <ComboToast points={comboPoints} streak={comboStreak} />
-      <header className="mb-6 flex min-h-[3.5rem] flex-wrap items-center justify-between gap-4">
+      <header
+        className={[
+          "mb-4 flex min-h-[3.25rem] flex-wrap items-center justify-between gap-3",
+          running ? "sm:mb-6" : "mb-6",
+        ].join(" ")}
+      >
         <Link href="/" className="group">
           <p className="text-sm text-ash transition group-hover:text-paper">
             Soroban
           </p>
-          <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+          <h1
+            className={[
+              "font-semibold tracking-tight",
+              running ? "text-xl sm:text-3xl" : "text-2xl sm:text-3xl",
+            ].join(" ")}
+          >
             {meta.title}
           </h1>
         </Link>
         <div className="flex flex-wrap items-center gap-2 text-sm">
-          <button
-            type="button"
-            onClick={() => openHowToPlay()}
-            className="rounded-full border border-smoke bg-ink-soft/80 px-4 py-2 text-ash transition hover:border-paper hover:text-paper"
-          >
-            How to play
-          </button>
+          {!running && (
+            <button
+              type="button"
+              onClick={() => openHowToPlay()}
+              className="rounded-full border border-smoke bg-ink-soft/80 px-4 py-2 text-ash transition hover:border-paper hover:text-paper"
+            >
+              How to play
+            </button>
+          )}
           <SoundToggle />
           <Stat label="Score" value={running || finished ? score : "—"} />
           {mode !== "practice" && (
@@ -497,8 +509,8 @@ export function GameClient({ mode = "timed" }: GameClientProps) {
         )}
 
         {running && problem && (
-          <section className="flex flex-1 flex-col items-center gap-6 pt-2">
-            <div className="min-h-[7.5rem] text-center">
+          <section className="flex flex-1 flex-col items-center gap-4 pb-28 pt-1 sm:gap-6 sm:pb-8">
+            <div className="min-h-[6.5rem] text-center sm:min-h-[7.5rem]">
               <p className="text-sm text-ash">Make this number</p>
               <p
                 className={[
@@ -533,43 +545,41 @@ export function GameClient({ mode = "timed" }: GameClientProps) {
               />
             </div>
 
-            <div className="flex min-h-[3rem] flex-wrap justify-center gap-3">
-              <button
-                type="button"
-                onClick={resetBoard}
-                className="rounded-full border border-smoke px-5 py-2.5 text-base text-ash transition hover:border-paper hover:text-paper"
-              >
-                Clear
-              </button>
-              {helpAllowed ? (
+            <div className="fixed inset-x-0 bottom-0 z-20 border-t border-smoke/70 bg-ink/95 px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 backdrop-blur sm:static sm:z-auto sm:border-0 sm:bg-transparent sm:p-0 sm:backdrop-blur-none">
+              <div className="mx-auto flex max-w-5xl min-h-[3rem] flex-wrap justify-center gap-3">
                 <button
                   type="button"
-                  onClick={showHelp}
-                  className="rounded-full border border-amber/50 px-5 py-2.5 text-base text-amber transition hover:bg-amber/10"
+                  onClick={resetBoard}
+                  className="rounded-full border border-smoke px-5 py-3 text-base text-ash transition hover:border-paper hover:text-paper"
                 >
-                  {hintRods ? "Hints on" : "Help"}
+                  Clear
                 </button>
-              ) : (
-                <span className="invisible rounded-full border px-5 py-2.5 text-base">
-                  Help
-                </span>
-              )}
-              <button
-                type="button"
-                onClick={skipProblem}
-                className="rounded-full border border-smoke px-5 py-2.5 text-base text-ash transition hover:border-paper hover:text-paper"
-              >
-                Skip
-              </button>
-              {mode === "practice" && (
+                {helpAllowed ? (
+                  <button
+                    type="button"
+                    onClick={showHelp}
+                    className="rounded-full border border-amber/50 px-5 py-3 text-base text-amber transition hover:bg-amber/10"
+                  >
+                    {hintRods ? "Hints on" : "Help"}
+                  </button>
+                ) : null}
                 <button
                   type="button"
-                  onClick={finishRound}
-                  className="rounded-full border border-lacquer/50 px-5 py-2.5 text-base text-lacquer transition hover:bg-lacquer/10"
+                  onClick={skipProblem}
+                  className="rounded-full border border-smoke px-5 py-3 text-base text-ash transition hover:border-paper hover:text-paper"
                 >
-                  Done
+                  Skip
                 </button>
-              )}
+                {mode === "practice" && (
+                  <button
+                    type="button"
+                    onClick={finishRound}
+                    className="rounded-full border border-lacquer/50 px-5 py-3 text-base text-lacquer transition hover:bg-lacquer/10"
+                  >
+                    Done
+                  </button>
+                )}
+              </div>
             </div>
           </section>
         )}
