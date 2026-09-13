@@ -12,9 +12,10 @@ const CHANGE_EVENT = "soroban-runs-changed";
 const MAX_RUNS = 12;
 
 function emit() {
-  if (typeof window !== "undefined") {
+  if (typeof window === "undefined") return;
+  window.queueMicrotask(() => {
     window.dispatchEvent(new Event(CHANGE_EVENT));
-  }
+  });
 }
 
 export function loadRuns(): RunRecord[] {
