@@ -24,9 +24,11 @@ const EMPTY: PersonalStats = {
 };
 
 function emit() {
-  if (typeof window !== "undefined") {
+  if (typeof window === "undefined") return;
+  // Defer so callers inside React setState/updaters don't sync-notify subscribers mid-render.
+  window.queueMicrotask(() => {
     window.dispatchEvent(new Event(CHANGE_EVENT));
-  }
+  });
 }
 
 export function loadStats(): PersonalStats {
