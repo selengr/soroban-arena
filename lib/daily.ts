@@ -8,6 +8,14 @@ export function todayKey(date = new Date()): string {
   return `${y}-${m}-${d}`;
 }
 
+/** UTC calendar day before `dayKey`. */
+export function previousDayKey(dayKey = todayKey()): string {
+  const [y, m, d] = dayKey.split("-").map(Number);
+  const date = new Date(Date.UTC(y, m - 1, d));
+  date.setUTCDate(date.getUTCDate() - 1);
+  return todayKey(date);
+}
+
 /** Deterministic seed shared by every player for a calendar day. */
 export function dailySeed(dayKey = todayKey()): number {
   const rng = createRng(
