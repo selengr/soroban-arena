@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { HomeComeBack } from "@/components/HomeComeBack";
 import { HowToPlay } from "@/components/HowToPlay";
 import { HowToPlayButton } from "@/components/HowToPlayButton";
 import { SiteNav } from "@/components/SiteNav";
@@ -68,6 +69,8 @@ export default function HomePage() {
             </Link>
             <HowToPlayButton className="rounded-full border border-smoke px-7 py-4 text-base text-ash transition hover:border-paper hover:text-paper" />
           </div>
+
+          <HomeComeBack />
 
           <div className="animate-rise-late mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {MODES.map((mode) => (
