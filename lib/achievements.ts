@@ -61,9 +61,10 @@ const STORAGE_KEY = "soroban-achievements-v1";
 const CHANGE_EVENT = "soroban-achievements-changed";
 
 function emit() {
-  if (typeof window !== "undefined") {
+  if (typeof window === "undefined") return;
+  window.queueMicrotask(() => {
     window.dispatchEvent(new Event(CHANGE_EVENT));
-  }
+  });
 }
 
 export function loadUnlocked(): AchievementId[] {
