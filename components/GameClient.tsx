@@ -207,17 +207,19 @@ export function GameClient({ mode = "timed" }: GameClientProps) {
     if (!running || finished || mode === "practice") return;
     const id = window.setInterval(() => {
       setSecondsLeft((s) => {
-        if (s <= 1) {
-          window.clearInterval(id);
-          finishRound();
-          return 0;
-        }
+        if (s <= 1) return 0;
         if (s <= 10) playSound("tick");
         return s - 1;
       });
     }, 1000);
     return () => window.clearInterval(id);
-  }, [running, finished, mode, finishRound]);
+  }, [running, finished, mode]);
+
+  useEffect(() => {
+    if (!running || finished || mode === "practice") return;
+    if (secondsLeft > 0) return;
+    finishRound();
+  }, [secondsLeft, running, finished, mode, finishRound]);
 
   const loadNext = useCallback(() => {
     let p: Problem;
@@ -365,7 +367,7 @@ export function GameClient({ mode = "timed" }: GameClientProps) {
       <HowToPlay />
       <Celebration active={finished && newBest} />
       <ComboToast points={comboPoints} streak={comboStreak} />
-      <header className="mb-6 flex flex-wrap items-center justify-between gap-4">
+      <header className="mb-6 flex min-h-[3.5rem] flex-wrap items-center justify-between gap-4">
         <Link href="/" className="group">
           <p className="text-sm text-ash transition group-hover:text-paper">
             Soroban
@@ -375,246 +377,264 @@ export function GameClient({ mode = "timed" }: GameClientProps) {
           </h1>
         </Link>
         <div className="flex flex-wrap items-center gap-2 text-sm">
-          {!running && (
-            <button
-              type="button"
-              onClick={() => openHowToPlay()}
-              className="rounded-full border border-smoke bg-ink-soft/80 px-4 py-2 text-ash transition hover:border-paper hover:text-paper"
-            >
-              How to play
-            </button>
-          )}
+          <button
+            type="button"
+            onClick={() => openHowToPlay()}
+            className="rounded-full border border-smoke bg-ink-soft/80 px-4 py-2 text-ash transition hover:border-paper hover:text-paper"
+          >
+            How to play
+          </button>
           <SoundToggle />
-          {running && (
-            <>
-              <Stat label="Score" value={score} />
-              {mode !== "practice" && (
-                <Stat
-                  label="Time"
-                  value={`${secondsLeft}s`}
-                  hot={secondsLeft <= 15}
-                />
-              )}
-            </>
+          <Stat label="Score" value={running || finished ? score : "—"} />
+          {mode !== "practice" && (
+            <Stat
+              label="Time"
+              value={
+                running
+                  ? `${secondsLeft}s`
+                  : finished
+                    ? "0s"
+                    : `${ROUND_SECONDS}s`
+              }
+              hot={running && secondsLeft <= 15}
+            />
           )}
         </div>
       </header>
 
-      {!running && !finished && (
-        <section className="animate-rise mx-auto mt-8 max-w-lg text-center">
-          <h2 className="text-4xl font-semibold tracking-tight sm:text-5xl">
-            {mode === "daily"
-              ? "Today’s puzzle"
-              : mode === "practice"
-                ? "Practice mode"
-                : "Ready to play?"}
-          </h2>
-          <p className="mt-4 text-lg text-ash">{meta.blurb}</p>
-          {alreadyDidDaily && (
-            <p className="mt-3 text-base text-amber">
-              You scored {stats.lastDailyScore} today. Try again to beat it!
-            </p>
-          )}
-
-          {(mode === "timed" || mode === "practice") && (
-            <div className="mt-8 space-y-5">
-              <p className="text-sm text-ash">Pick a level</p>
-              <div className="flex flex-wrap justify-center gap-3">
-                {(["easy", "medium", "hard"] as Difficulty[]).map((level) => {
-                  const metaLevel = DIFFICULTY_META[level];
-                  const active = difficulty === level;
-                  return (
-                    <button
-                      key={level}
-                      type="button"
-                      onClick={() => {
-                        setPickedDifficulty(level);
-                        saveLastDifficulty(level);
-                        playSound("bead");
-                      }}
-                      className={[
-                        "min-w-[6.5rem] rounded-full border px-5 py-3 text-base transition",
-                        active
-                          ? "border-lacquer bg-lacquer/10 text-lacquer"
-                          : "border-smoke bg-ink-soft text-paper hover:border-amber/60",
-                      ].join(" ")}
-                    >
-                      {metaLevel.label}
-                    </button>
-                  );
-                })}
-              </div>
-              <p className="text-sm text-ash">
-                {DIFFICULTY_META[difficulty].detail}
+      <div className="flex min-h-[70dvh] flex-1 flex-col">
+        {!running && !finished && (
+          <section className="mx-auto flex w-full max-w-lg flex-1 flex-col justify-center text-center">
+            <h2 className="text-4xl font-semibold tracking-tight sm:text-5xl">
+              {mode === "daily"
+                ? "Today’s puzzle"
+                : mode === "practice"
+                  ? "Practice mode"
+                  : "Ready to play?"}
+            </h2>
+            <p className="mt-4 min-h-[1.75rem] text-lg text-ash">{meta.blurb}</p>
+            {alreadyDidDaily && (
+              <p className="mt-3 text-base text-amber">
+                You scored {stats.lastDailyScore} today. Try again to beat it!
               </p>
+            )}
+
+            {(mode === "timed" || mode === "practice") && (
+              <div className="mt-8 space-y-5">
+                <p className="text-sm text-ash">Pick a level</p>
+                <div className="flex flex-wrap justify-center gap-3">
+                  {(["easy", "medium", "hard"] as Difficulty[]).map((level) => {
+                    const metaLevel = DIFFICULTY_META[level];
+                    const active = difficulty === level;
+                    return (
+                      <button
+                        key={level}
+                        type="button"
+                        onClick={() => {
+                          setPickedDifficulty(level);
+                          saveLastDifficulty(level);
+                          playSound("bead");
+                        }}
+                        className={[
+                          "min-w-[6.5rem] rounded-full border px-5 py-3 text-base transition",
+                          active
+                            ? "border-lacquer bg-lacquer/10 text-lacquer"
+                            : "border-smoke bg-ink-soft text-paper hover:border-amber/60",
+                        ].join(" ")}
+                      >
+                        {metaLevel.label}
+                      </button>
+                    );
+                  })}
+                </div>
+                <p className="min-h-[1.5rem] text-sm text-ash">
+                  {DIFFICULTY_META[difficulty].detail}
+                </p>
+                <button
+                  type="button"
+                  onClick={() => startGame(difficulty)}
+                  className="rounded-full bg-lacquer px-10 py-4 text-base font-medium text-white transition hover:bg-lacquer-deep"
+                >
+                  {mode === "timed" ? "Start" : "Start practice"}
+                </button>
+              </div>
+            )}
+
+            {mode === "daily" && (
+              <button
+                type="button"
+                onClick={() => startGame()}
+                className="mt-8 rounded-full bg-lacquer px-10 py-4 text-base font-medium text-white transition hover:bg-lacquer-deep"
+              >
+                Start
+              </button>
+            )}
+
+            <div className="mt-10 flex min-h-[1.5rem] flex-wrap justify-center gap-5 text-base">
+              {mode !== "timed" && (
+                <Link href="/play" className="text-ash hover:text-amber">
+                  Timed play
+                </Link>
+              )}
+              {mode !== "practice" && (
+                <Link
+                  href="/play/practice"
+                  className="text-ash hover:text-amber"
+                >
+                  Practice
+                </Link>
+              )}
+              {mode !== "daily" && (
+                <Link href="/play/daily" className="text-ash hover:text-amber">
+                  Today’s puzzle
+                </Link>
+              )}
+            </div>
+          </section>
+        )}
+
+        {running && problem && (
+          <section className="flex flex-1 flex-col items-center gap-6 pt-2">
+            <div className="min-h-[7.5rem] text-center">
+              <p className="text-sm text-ash">Make this number</p>
+              <p
+                className={[
+                  "mt-2 font-mono text-4xl font-semibold tracking-tight sm:text-5xl",
+                  flash === "ok" ? "text-amber" : "text-paper",
+                ].join(" ")}
+              >
+                {formatProblem(problem)}
+              </p>
+              <p className="mt-3 text-base text-ash">
+                Your beads:{" "}
+                <span className={matched ? "text-amber" : "text-paper"}>
+                  {value}
+                </span>
+              </p>
+              <p
+                className={[
+                  "mt-2 text-sm text-amber transition-opacity",
+                  helpNudgeVisible ? "opacity-100" : "opacity-0",
+                ].join(" ")}
+              >
+                Stuck? Tap Help.
+              </p>
+            </div>
+
+            <div className="flex w-full justify-center">
+              <AbacusBoard
+                rods={rods}
+                onChange={handleRodsChange}
+                matched={matched}
+                hintRods={hintRods}
+              />
+            </div>
+
+            <div className="flex min-h-[3rem] flex-wrap justify-center gap-3">
+              <button
+                type="button"
+                onClick={resetBoard}
+                className="rounded-full border border-smoke px-5 py-2.5 text-base text-ash transition hover:border-paper hover:text-paper"
+              >
+                Clear
+              </button>
+              {helpAllowed ? (
+                <button
+                  type="button"
+                  onClick={showHelp}
+                  className="rounded-full border border-amber/50 px-5 py-2.5 text-base text-amber transition hover:bg-amber/10"
+                >
+                  {hintRods ? "Hints on" : "Help"}
+                </button>
+              ) : (
+                <span className="invisible rounded-full border px-5 py-2.5 text-base">
+                  Help
+                </span>
+              )}
+              <button
+                type="button"
+                onClick={skipProblem}
+                className="rounded-full border border-smoke px-5 py-2.5 text-base text-ash transition hover:border-paper hover:text-paper"
+              >
+                Skip
+              </button>
+              {mode === "practice" && (
+                <button
+                  type="button"
+                  onClick={finishRound}
+                  className="rounded-full border border-lacquer/50 px-5 py-2.5 text-base text-lacquer transition hover:bg-lacquer/10"
+                >
+                  Done
+                </button>
+              )}
+            </div>
+          </section>
+        )}
+
+        {finished && (
+          <section className="mx-auto mt-2 w-full max-w-md flex-1 text-center">
+            <p className="text-base text-ash">Nice work!</p>
+            <h2 className="mt-2 text-6xl font-semibold text-amber">{score}</h2>
+            {newBest && (
+              <p className="mt-2 text-base text-lacquer">New best score!</p>
+            )}
+            {freshAchievements.length > 0 && (
+              <ul className="mt-3 space-y-1 text-base text-amber">
+                {freshAchievements.map((id) => {
+                  const item = ACHIEVEMENTS.find((a) => a.id === id);
+                  return <li key={id}>Badge: {item?.title ?? id}</li>;
+                })}
+              </ul>
+            )}
+            <p className="mt-2 text-ash">{solved} correct</p>
+            {mode !== "practice" && (
+              <div className="mt-6 flex flex-col gap-3">
+                <input
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Your name"
+                  maxLength={16}
+                  className="rounded-full border border-smoke bg-ink-soft px-4 py-3 text-center text-base outline-none focus:border-amber"
+                />
+                <button
+                  type="button"
+                  onClick={() => void submitScore()}
+                  disabled={saving}
+                  className="rounded-full bg-lacquer px-5 py-3 text-base font-medium text-white transition hover:bg-lacquer-deep disabled:opacity-60"
+                >
+                  {saving ? "Saving…" : "Save my score"}
+                </button>
+              </div>
+            )}
+            {saveMessage && (
+              <p className="mt-3 text-sm text-ash">{saveMessage}</p>
+            )}
+            <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
               <button
                 type="button"
                 onClick={() => startGame(difficulty)}
-                className="rounded-full bg-lacquer px-10 py-4 text-base font-medium text-white transition hover:bg-lacquer-deep"
+                className="rounded-full bg-lacquer px-8 py-3 text-base font-medium text-white transition hover:bg-lacquer-deep"
               >
-                {mode === "timed" ? "Start" : "Start practice"}
+                Play again
               </button>
-            </div>
-          )}
-
-          {mode === "daily" && (
-            <button
-              type="button"
-              onClick={() => startGame()}
-              className="mt-8 rounded-full bg-lacquer px-10 py-4 text-base font-medium text-white transition hover:bg-lacquer-deep"
-            >
-              Start
-            </button>
-          )}
-
-          <div className="mt-10 flex flex-wrap justify-center gap-5 text-base">
-            {mode !== "timed" && (
-              <Link href="/play" className="text-ash hover:text-amber">
-                Timed play
-              </Link>
-            )}
-            {mode !== "practice" && (
-              <Link href="/play/practice" className="text-ash hover:text-amber">
-                Practice
-              </Link>
-            )}
-            {mode !== "daily" && (
-              <Link href="/play/daily" className="text-ash hover:text-amber">
-                Today’s puzzle
-              </Link>
-            )}
-          </div>
-        </section>
-      )}
-
-      {running && problem && (
-        <section className="animate-rise flex flex-1 flex-col items-center gap-6">
-          <div className="text-center">
-            <p className="text-sm text-ash">Make this number</p>
-            <p
-              className={[
-                "mt-2 font-mono text-4xl font-semibold tracking-tight sm:text-5xl",
-                flash === "ok" ? "text-amber" : "text-paper",
-              ].join(" ")}
-            >
-              {formatProblem(problem)}
-            </p>
-            <p className="mt-3 text-base text-ash">
-              Your beads:{" "}
-              <span className={matched ? "text-amber" : "text-paper"}>
-                {value}
-              </span>
-            </p>
-            {helpNudgeVisible && (
-              <p className="mt-2 text-sm text-amber">Stuck? Tap Help.</p>
-            )}
-          </div>
-
-          <AbacusBoard
-            rods={rods}
-            onChange={handleRodsChange}
-            matched={matched}
-            hintRods={hintRods}
-          />
-
-          <div className="flex flex-wrap justify-center gap-3">
-            <button
-              type="button"
-              onClick={resetBoard}
-              className="rounded-full border border-smoke px-5 py-2.5 text-base text-ash transition hover:border-paper hover:text-paper"
-            >
-              Clear
-            </button>
-            {helpAllowed && (
-              <button
-                type="button"
-                onClick={showHelp}
-                className="rounded-full border border-amber/50 px-5 py-2.5 text-base text-amber transition hover:bg-amber/10"
-              >
-                {hintRods ? "Hints on" : "Help"}
-              </button>
-            )}
-            <button
-              type="button"
-              onClick={skipProblem}
-              className="rounded-full border border-smoke px-5 py-2.5 text-base text-ash transition hover:border-paper hover:text-paper"
-            >
-              Skip
-            </button>
-            {mode === "practice" && (
-              <button
-                type="button"
-                onClick={finishRound}
-                className="rounded-full border border-lacquer/50 px-5 py-2.5 text-base text-lacquer transition hover:bg-lacquer/10"
-              >
-                Done
-              </button>
-            )}
-          </div>
-        </section>
-      )}
-
-      {finished && (
-        <section className="animate-rise mx-auto mt-6 w-full max-w-md text-center">
-          <p className="text-base text-ash">Nice work!</p>
-          <h2 className="mt-2 text-6xl font-semibold text-amber">{score}</h2>
-          {newBest && (
-            <p className="mt-2 text-base text-lacquer">New best score!</p>
-          )}
-          {freshAchievements.length > 0 && (
-            <ul className="mt-3 space-y-1 text-base text-amber">
-              {freshAchievements.map((id) => {
-                const item = ACHIEVEMENTS.find((a) => a.id === id);
-                return <li key={id}>Badge: {item?.title ?? id}</li>;
-              })}
-            </ul>
-          )}
-          <p className="mt-2 text-ash">{solved} correct</p>
-          {mode !== "practice" && (
-            <div className="mt-6 flex flex-col gap-3">
-              <input
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Your name"
-                maxLength={16}
-                className="rounded-full border border-smoke bg-ink-soft px-4 py-3 text-center text-base outline-none focus:border-amber"
+              <ShareScoreButton
+                score={score}
+                solved={solved}
+                modeLabel={
+                  mode === "daily"
+                    ? "Today"
+                    : mode === "practice"
+                      ? "Practice"
+                      : `Play ${difficulty}`
+                }
               />
-              <button
-                type="button"
-                onClick={() => void submitScore()}
-                disabled={saving}
-                className="rounded-full bg-lacquer px-5 py-3 text-base font-medium text-white transition hover:bg-lacquer-deep disabled:opacity-60"
-              >
-                {saving ? "Saving…" : "Save my score"}
-              </button>
             </div>
-          )}
-          {saveMessage && <p className="mt-3 text-sm text-ash">{saveMessage}</p>}
-          <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
-            <button
-              type="button"
-              onClick={() => startGame(difficulty)}
-              className="rounded-full bg-lacquer px-8 py-3 text-base font-medium text-white transition hover:bg-lacquer-deep"
-            >
-              Play again
-            </button>
-            <ShareScoreButton
-              score={score}
-              solved={solved}
-              modeLabel={
-                mode === "daily"
-                  ? "Today"
-                  : mode === "practice"
-                    ? "Practice"
-                    : `Play ${difficulty}`
-              }
-            />
-          </div>
-          {mode !== "practice" && (
-            <Leaderboard defaultFilter={mode === "daily" ? "day" : "week"} />
-          )}
-        </section>
-      )}
+            {mode !== "practice" && (
+              <Leaderboard defaultFilter={mode === "daily" ? "day" : "week"} />
+            )}
+          </section>
+        )}
+      </div>
     </div>
   );
 }
