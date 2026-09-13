@@ -43,7 +43,7 @@ Open [http://localhost:3010](http://localhost:3010).
 - **Race pace meter** — live solved-count comparison vs rival
 - **Problem history strip** — recent solves and skips in-session
 - **Daily reset clock** — countdown to the next UTC daily board
-- **Installable PWA manifest** — add to home screen friendly
+- **Installable on phones** — Add to Home Screen / installable PWA icons
 - **Public leaderboard** — scores post through the API (file/memory locally, Upstash Redis in production if configured)
 - **Sound** — bead clicks, success, timer ticks, mute toggle
 - **Multiplayer race** — create/join a room code or invite link, same seeded problems, live rival score
