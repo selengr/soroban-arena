@@ -202,11 +202,7 @@ export function AbacusBoard({
     <div
       className={[
         "w-full rounded-2xl border border-smoke bg-gradient-to-b from-[#3a2818] to-[#24170f] shadow-[0_30px_80px_rgba(0,0,0,0.45)]",
-        compact
-          ? "max-w-xs p-3"
-          : rods.length <= 3
-            ? "max-w-xl p-4 sm:p-6"
-            : "max-w-3xl p-4 sm:p-6",
+        compact ? "max-w-xs p-3" : "max-w-3xl p-4 sm:p-6",
         matched ? "match-glow" : "",
       ].join(" ")}
     >
