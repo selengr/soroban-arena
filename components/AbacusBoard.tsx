@@ -25,7 +25,7 @@ function Bead({
       onClick={onClick}
       aria-pressed={active}
       className={[
-        "bead relative z-10 h-9 w-[90%] max-w-[56px] touch-manipulation rounded-full border transition-all duration-200 sm:h-8 sm:max-w-[52px]",
+        "bead relative z-10 h-11 w-[92%] max-w-[64px] touch-manipulation rounded-full border transition-all duration-200 sm:h-8 sm:max-w-[52px]",
         "shadow-[inset_0_2px_4px_rgba(255,255,255,0.28),0_4px_10px_rgba(0,0,0,0.35)]",
         "disabled:cursor-not-allowed disabled:opacity-60",
         "active:bead-press focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber",
@@ -74,7 +74,7 @@ export function Rod({
     <div
       className={[
         "flex w-[14%] flex-col items-center rounded-lg transition",
-        compact ? "min-w-[44px] max-w-[56px]" : "min-w-[52px] max-w-[72px]",
+        compact ? "min-w-[44px] max-w-[56px]" : "min-w-[56px] max-w-[80px] sm:min-w-[52px] sm:max-w-[72px]",
         selected ? "ring-2 ring-amber/70 ring-offset-2 ring-offset-[#24170f]" : "",
       ].join(" ")}
     >
@@ -89,7 +89,7 @@ export function Rod({
       <div
         className={[
           "relative flex w-full flex-col items-center rounded-sm bg-gradient-to-b from-wood-light to-wood px-1 py-2 shadow-[inset_0_0_0_1px_rgba(0,0,0,0.35)]",
-          compact ? "h-[220px]" : "h-[300px] sm:h-[280px]",
+          compact ? "h-[220px]" : "h-[320px] sm:h-[280px]",
         ].join(" ")}
       >
         <div className="pointer-events-none absolute inset-y-2 left-1/2 w-[3px] -translate-x-1/2 rounded-full bg-beam/80" />
