@@ -19,7 +19,10 @@ const ibm = IBM_Plex_Mono({
   display: "swap",
 });
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3010";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
   title: {
     default: "Soroban Arena",
     template: "%s · Soroban Arena",
@@ -34,18 +37,15 @@ export const metadata: Metadata = {
     title: "Soroban",
     statusBarStyle: "black-translucent",
   },
-  icons: {
-    icon: [{ url: "/icon-192.svg", type: "image/svg+xml" }],
-    apple: [{ url: "/icon-192.svg" }],
-  },
   openGraph: {
     title: "Soroban Arena",
     description:
       "A timed digital soroban with public scores and 1v1 bead races.",
     type: "website",
+    siteName: "Soroban Arena",
   },
   twitter: {
-    card: "summary",
+    card: "summary_large_image",
     title: "Soroban Arena",
     description:
       "A timed digital soroban with public scores and 1v1 bead races.",
