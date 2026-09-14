@@ -1,8 +1,8 @@
 # Soroban Arena
 
-Timed digital soroban with a public leaderboard, sound, and 1v1 race rooms.
+Timed digital soroban you can play in the browser or install on your phone.
 
-**Suggested GitHub repo name:** `soroban-arena`
+Repo: [selengr/soroban-arena](https://github.com/selengr/soroban-arena)
 
 ## Stack
 
@@ -11,7 +11,7 @@ Timed digital soroban with a public leaderboard, sound, and 1v1 race rooms.
 - Tailwind CSS 4
 - TypeScript
 
-## Getting started
+## Local setup
 
 ```bash
 npm install
@@ -20,50 +20,49 @@ npm run dev
 
 Open [http://localhost:3010](http://localhost:3010).
 
-> Note: this app uses **port 3010** so it does not collide with other local apps on 3000.
+Port **3010** is only for local use (so it does not collide with other apps on 3000).
 
 ## Play
 
-- Landing: `/`
-- Solo arena: `/play`
-- Daily challenge: `/play/daily`
-- Practice: `/play/practice`
-- 1v1 race: `/play/race`
-- Public scores API: `GET/POST /api/scores`
+| Path | Mode |
+| --- | --- |
+| `/` | Home |
+| `/play` | Timed solo |
+| `/play/daily` | Shared daily puzzle |
+| `/play/practice` | No timer |
+| `/play/race` | 1v1 rooms |
+| `/settings` | Name, sound, theme |
 
-## Features
+## Deploy (Vercel)
 
-- **Daily challenge** — one seeded board for everyone each UTC day
-- **Practice mode** — untimed warm-ups
-- **Achievements** — unlock badges for streaks, scores, and daily clears
-- **Keyboard controls** — arrow keys select a rod; `0-4` set earth beads; `H`/`5` toggle heaven
-- **Combo toasts** — floating score feedback on each solve
-- **Share results** — copy or native-share your run
-- **Race countdown** — shared 3-2-1 freeze before beads unlock
-- **Race pace meter** — live solved-count comparison vs rival
-- **Problem history strip** — recent solves and skips in-session
-- **Daily reset clock** — countdown to the next UTC daily board
-- **Installable on phones** — Add to Home Screen / installable PWA icons
-- **Public leaderboard** — scores post through the API (file/memory locally, Upstash Redis in production if configured)
-- **Sound** — bead clicks, success, timer ticks, mute toggle
-- **Multiplayer race** — create/join a room code or invite link, same seeded problems, live rival score
+1. Import the GitHub repo into [Vercel](https://vercel.com).
+2. Set environment variables (see `.env.example`):
+   - `NEXT_PUBLIC_SITE_URL` — your live URL, e.g. `https://your-app.vercel.app`
+   - `UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN` — for public scores and races on serverless
+3. Deploy.
 
-## Optional Upstash
-
-Copy `.env.example` to `.env.local` and set:
+Without Upstash, a **single always-on Node server** can still use `.data/store.json`. On typical Vercel serverless, set Upstash or scores/rooms will not stay reliable.
 
 ```bash
+npm run build
+npm start   # local production check; host sets the public port
+```
+
+## Optional env
+
+Copy `.env.example` to `.env.local`:
+
+```bash
+NEXT_PUBLIC_SITE_URL=https://your-domain.com
 UPSTASH_REDIS_REST_URL=
 UPSTASH_REDIS_REST_TOKEN=
 ```
 
-Without Redis, local/dev still works via `.data/store.json`.
+## Privacy (short)
 
-## Scripts
+- Personal stats, mute, theme, and name stay in the browser (`localStorage`).
+- Saved public scores and race rooms are stored on the server (file or Upstash).
 
-```bash
-npm run dev
-npm run build
-npm start
-npm run lint
-```
+## License
+
+MIT — see `LICENSE`.
