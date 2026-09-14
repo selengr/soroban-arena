@@ -207,13 +207,32 @@ export function RaceClient({ initialCode = "" }: RaceClientProps) {
 
   useEffect(() => {
     if (!roomCode) return;
+    let misses = 0;
     const id = window.setInterval(() => {
       void fetch(`/api/rooms/${roomCode}`, { cache: "no-store" })
-        .then((res) => res.json())
-        .then((data: { room?: PublicRoom }) => {
-          if (data.room) setRoom(data.room);
+        .then(async (res) => {
+          if (!res.ok) {
+            misses += 1;
+            if (misses >= 3) {
+              setError("Lost the room connection. Check your link or try again.");
+            }
+            return;
+          }
+          misses = 0;
+          const data = (await res.json()) as { room?: PublicRoom };
+          if (data.room) {
+            setRoom(data.room);
+            setError((prev) =>
+              prev?.startsWith("Lost the room") ? null : prev,
+            );
+          }
         })
-        .catch(() => undefined);
+        .catch(() => {
+          misses += 1;
+          if (misses >= 3) {
+            setError("Lost the room connection. Check your link or try again.");
+          }
+        });
     }, 1000);
     return () => window.clearInterval(id);
   }, [roomCode]);
